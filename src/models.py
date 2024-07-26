@@ -7,7 +7,6 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(80), unique=False, nullable=False)
     is_active = db.Column(db.Boolean(), unique=False, nullable=False)
-
     favorites = db.relationship('Favorites', backref='favorites_user_id', lazy=True)
     
     def __repr__(self):
@@ -17,6 +16,12 @@ class User(db.Model):
             "id": self.id,
             "email": self.email,
             # do not serialize the password, its a security breach
+        }
+
+    def get_user_favorites(self):
+        return {
+            "user": self.serialize(),
+            "favorites": list(map(lambda item: item.serialize(), self.favorites))
         }
 
 class Favorites(db.Model):
@@ -32,6 +37,10 @@ class Favorites(db.Model):
     def serialize(self):
         return {
             "id": self.id,
+            "user": self.user_id,
+            "character_id": self.character_id,
+            "planet_id": self.planet_id,
+            "vehicle_id": self.vehicle_id,
         }
 
 class Character(db.Model):
@@ -40,7 +49,6 @@ class Character(db.Model):
     name = db.Column(db.String(80), unique=True)
     gender = db.Column(db.String(40))
     eye = db.Column(db.String(20))
-
     favorites = db.relationship('Favorites', backref='favorites_character_id', lazy=True)
 
     def __repr__(self):
@@ -48,6 +56,9 @@ class Character(db.Model):
     def serialize(self):
         return {
             "id": self.id,
+            "name": self.name,
+            "gender": self.gender,
+            "eye": self.eye,
         }
 
 class Planet(db.Model):
@@ -55,8 +66,6 @@ class Planet(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), unique=True)
     population = db.Column(db.Integer)
-    eye = db.Column(db.String(20))
-
     favorites = db.relationship('Favorites', backref='favorites_planet_id', lazy=True)
 
 
@@ -65,6 +74,8 @@ class Planet(db.Model):
     def serialize(self):
         return {
             "id": self.id,
+            "name": self.name,
+            "population": self.population,
         }
 
 class Vehicle(db.Model):
@@ -73,7 +84,6 @@ class Vehicle(db.Model):
     name = db.Column(db.String(80), unique=True)
     model = db.Column(db.String(40))
     size = db.Column(db.Integer)
-
     favorites = db.relationship('Favorites', backref='favorites_vehicle_id', lazy=True)
 
 
@@ -82,4 +92,7 @@ class Vehicle(db.Model):
     def serialize(self):
         return {
             "id": self.id,
+            "name": self.name,
+            "model": self.model,
+            "size": self.size,
         }

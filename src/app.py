@@ -8,7 +8,7 @@ from flask_swagger import swagger # type: ignore
 from flask_cors import CORS # type: ignore
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User
+from models import db, User, Character, Planet, Vehicle, Favorites
 #from models import Person
 
 app = Flask(__name__)
@@ -35,33 +35,98 @@ def handle_invalid_usage(error):
 @app.route('/')
 def sitemap():
     return generate_sitemap(app)
-
     # CODE GOES HERE
 
-@app.route('/user', methods=['GET'])
-def handle_hello():
+# Obtener usuarios--------------------------------------------------------------------------
+@app.route('/users', methods=['GET'])
+def get_users():
+    users = User.query.all()
+    data_serialized = [user.serialize() for user in users]
+    return jsonify(data_serialized), 200
 
+# Obtener usuario unico por id -------------------------------------------------------------
+@app.route('/user/<int:id>', methods=['GET'])
+def get_one_user(id):
+    user = User.query.filter_by(id = id).first()
+    if user == None:
+        return jsonify('User not found'), 404
+    else:
+        return jsonify(user.serialize()), 200
+ 
+# Obtener  favoritos de usuario por id -----------------------------------------------
+@app.route('/user/<int:id>/favorites', methods=['GET'])
+def get_user_favorites(id):
+    user = User.query.get(id)
+    if not user:
+        return jsonify('user not found'), 404
+    else:
+        return jsonify(user.get_user_favorites()), 200
 
-# @app.route('/todos', methods=['POST'])
-# def add_new_todo():
-#     request_body = request.get_json()  # Use get_json() to parse the JSON body
-#     print("Incoming request with the following body", request_body)
-#     todos.append(request_body)  # Add the new todo to the list
-#     return jsonify(todos)  # Return the updated list
+# Obtener Personajes -----------------------------------------------------------------------
+@app.route('/characters', methods=['GET'])
+def get_characters():
+    characters = Character.query.all()
+    data_serialized = [character.serialize() for character in characters]
+    return jsonify(data_serialized), 200
 
-# @app.route('/todos/<int:position>', methods=['DELETE'])
-# def delete_todo(position):
-#     # Check if the position is valid
-#     if position < 0 or position >= len(todos):
-#         return jsonify({"error": "Invalid position"}), 400
-#     del todos[position]
-#     return jsonify(todos)
+# Obtener Planetas -------------------------------------------------------------------------
+@app.route('/planets', methods=['GET'])
+def get_planets():
+    planets = Planet.query.all()
+    data_serialized = [planet.serialize() for planet in planets]
+    return jsonify(data_serialized), 200
 
-    response_body = {
-        "msg": "Hello, this is your GET /user response "
-    }
+# Obtener personaje unico por id -----------------------------------------------------------
+@app.route('/character/<int:id>', methods=['GET'])
+def get_one_character(id):
+    character = Character.query.filter_by(id = id).first()
+    if character == None:
+        return jsonify('Character not found'), 404
+    else:
+        character_serialized = character.serialize()
+        return jsonify(character_serialized), 200
 
-    return jsonify(response_body), 200
+# Obtener planeta unico por id -------------------------------------------------------------
+def get_one_planet(id):
+    planet = Planet.query.filter_by(id = id).first()
+    if planet == None:
+        return jsonify('Planet not found'), 404
+    else:
+        planet_serialized = planet.serialize()
+        return jsonify(planet_serialized), 200
+
+# Agregar personaje a favoritos tomando como referencia el id de usuario y personaje -------
+@app.route('/favorite/user/<int:user_id>/character/<int:character_id>', methods=['POST'])
+def add_favorite_character(user_id, character_id):
+    user = User.query.get(user_id)
+    character = Character.query.get(character_id)
+    if not user or not character:
+        return jsonify({'User or character not found'}), 404
+    else:
+        new_favorite_character = Favorites(user_id = user_id, character_id = character_id)
+        return jsonify(new_favorite_character.serialize()), 200
+    
+# Agregar planeta a favoritos tomando como referencia el id de usuario y planeta -----------
+@app.route('/favorite/user/<int:user_id>/planet/<int:planet_id>', methods=['POST'])
+def add_favorite_planet(user_id, planet_id):
+    user = User.query.get(user_id)
+    planet = Planet.query.get(planet_id)
+    if not user or not planet:
+        return jsonify({'User or planet not found'}), 404
+    else:
+        new_favorite_planet = Favorites(user_id = user_id, planet_id = planet_id)
+        return jsonify(new_favorite_planet.serialize()), 200
+
+# Eliminar personaje de favoritos tomando como referencia el id de usuario y personaje -----
+@app.route('/favorite/<int:id>', methods=['DELETE'])
+def delete_one_favorite(id):
+    favorite = Favorites.query.filter_by(id=id).first()
+    if not favorite:
+        return jsonify('favorite not found'), 404
+    else:
+        db.session.delete(favorite)
+        db.session.commit()
+        return jsonify('favorite deleted'), 200
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
