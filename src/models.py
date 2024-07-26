@@ -35,13 +35,15 @@ class Favorites(db.Model):
     def __repr__(self):
         return f"User: {str(self.user_id)}{' - Character: ' + str(self.character_id) if self.character_id else ''}{' - Planet: ' + str(self.planet_id) if self.planet_id else ''}{' - Vehicle: ' + str(self.vehicle_id) if self.vehicle_id else ''}"
     def serialize(self):
-        return {
-            "id": self.id,
-            "user": self.user_id,
-            "character_id": self.character_id,
-            "planet_id": self.planet_id,
-            "vehicle_id": self.vehicle_id,
-        }
+        if self.character_id:
+            return {"character id": self.character_id, "favorite id": self.id, "user id": self.user_id}
+        elif self.planet_id:
+            return {"planet id": self.planet_id, "favorite id": self.id, "user id": self.user_id}
+        elif self.vehicle_id:
+            return {"vehicle id": self.vehicle_id, "favorite id": self.id, "user id": self.user_id}
+        else:
+            return {"id": self.id, "user": self.user_id}
+                
 
 class Character(db.Model):
     __tablename__ = 'character'

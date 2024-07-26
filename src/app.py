@@ -53,7 +53,7 @@ def get_one_user(id):
     else:
         return jsonify(user.serialize()), 200
  
-# Obtener  favoritos de usuario por id -----------------------------------------------
+# Obtener  favoritos de usuario por id -----------------------------------------------------
 @app.route('/user/<int:id>/favorites', methods=['GET'])
 def get_user_favorites(id):
     user = User.query.get(id)
@@ -76,6 +76,13 @@ def get_planets():
     data_serialized = [planet.serialize() for planet in planets]
     return jsonify(data_serialized), 200
 
+# Obtener Vehicluos ------------------------------------------------------------------------
+@app.route('/vehicles', methods=['GET'])
+def get_vehicles():
+    vehicles = Vehicle.query.all()
+    data_serialized = [vehicle.serialize() for vehicle in vehicles]
+    return jsonify(data_serialized), 200
+
 # Obtener personaje unico por id -----------------------------------------------------------
 @app.route('/character/<int:id>', methods=['GET'])
 def get_one_character(id):
@@ -87,6 +94,7 @@ def get_one_character(id):
         return jsonify(character_serialized), 200
 
 # Obtener planeta unico por id -------------------------------------------------------------
+@app.route('/planet/<int:id>', methods=['GET'])
 def get_one_planet(id):
     planet = Planet.query.filter_by(id = id).first()
     if planet == None:
@@ -94,6 +102,16 @@ def get_one_planet(id):
     else:
         planet_serialized = planet.serialize()
         return jsonify(planet_serialized), 200
+
+# Obtener vehiculo unico por id ------------------------------------------------------------
+@app.route('/vehicle/<int:id>', methods=['GET'])
+def get_one_vehicle(id):
+    vehicle = Vehicle.query.filter_by(id = id).first()
+    if vehicle == None:
+        return jsonify('vehicle not found'), 404
+    else:
+        vehicle_serialized = vehicle.serialize()
+        return jsonify(vehicle_serialized), 200
 
 # Agregar personaje a favoritos tomando como referencia el id de usuario y personaje -------
 @app.route('/favorite/user/<int:user_id>/character/<int:character_id>', methods=['POST'])
@@ -104,6 +122,8 @@ def add_favorite_character(user_id, character_id):
         return jsonify({'User or character not found'}), 404
     else:
         new_favorite_character = Favorites(user_id = user_id, character_id = character_id)
+        db.session.add(new_favorite_character)
+        db.session.commit()
         return jsonify(new_favorite_character.serialize()), 200
     
 # Agregar planeta a favoritos tomando como referencia el id de usuario y planeta -----------
@@ -115,9 +135,24 @@ def add_favorite_planet(user_id, planet_id):
         return jsonify({'User or planet not found'}), 404
     else:
         new_favorite_planet = Favorites(user_id = user_id, planet_id = planet_id)
+        db.session.add(new_favorite_planet)
+        db.session.commit()
         return jsonify(new_favorite_planet.serialize()), 200
 
-# Eliminar personaje de favoritos tomando como referencia el id de usuario y personaje -----
+# Agregar vehiculo a favoritos tomando como referencia el id de usuario y vehiculo ---------
+@app.route('/favorite/user/<int:user_id>/vehicle/<int:vehicle_id>', methods=['POST'])
+def add_favorite_vehicle(user_id, vehicle_id):
+    user = User.query.get(user_id)
+    vehicle = Vehicle.query.get(vehicle_id)
+    if not user or not vehicle:
+        return jsonify({'User or vehicle not found'}), 404
+    else:
+        new_favorite_vehicle = Favorites(user_id = user_id, vehicle_id = vehicle_id)
+        db.session.add(new_favorite_vehicle)
+        db.session.commit()
+        return jsonify(new_favorite_vehicle.serialize()), 200
+
+# Eliminar favorito especifico por id ------------------------------------------------------
 @app.route('/favorite/<int:id>', methods=['DELETE'])
 def delete_one_favorite(id):
     favorite = Favorites.query.filter_by(id=id).first()
