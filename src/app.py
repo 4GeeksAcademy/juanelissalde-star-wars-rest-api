@@ -217,6 +217,12 @@ def delete_one_favorite(id):
         db.session.commit()
         return jsonify('favorite deleted'), 200
 
+
+@app.route('/character', methods=['POST'])
+def create_character():
+    return
+
+# bash ./docs/assets/reset_migrations.bash
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
     PORT = int(os.environ.get('PORT', 3000))
