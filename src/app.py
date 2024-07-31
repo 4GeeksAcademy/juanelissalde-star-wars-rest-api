@@ -113,6 +113,60 @@ def get_one_vehicle(id):
         vehicle_serialized = vehicle.serialize()
         return jsonify(vehicle_serialized), 200
 
+# Crear nuevo personaje --------------------------------------------------------------------
+@app.route('/character', methods=['POST'])
+def post_character():
+    character = request.get_json()
+    if not isinstance(character['img'], str) or len(character['img'].strip()) == 0:
+         return({'error':'"img" must be a string'}), 400
+    if not isinstance(character['name'], str) or len(character['name'].strip()) == 0:
+         return({'error':'"name" must be a string'}), 400
+    if not isinstance(character['gender'], str) or len(character['gender'].strip()) == 0:
+         return({'error':'"gender" must be a string'}), 400
+    if not isinstance(character['eye_color'], str) or len(character['eye_color'].strip()) == 0:
+         return({'error':'"eye_color" must be a string'}), 400
+    character_created = Character(img=character['img'],name=character['name'],gender=character['gender'],eye_color=character['eye_color'])
+    print(character_created)
+    db.session.add(character_created)
+    db.session.commit()
+    return jsonify('Character created'), 200
+
+# Crear nuevo planeta --------------------------------------------------------------------
+@app.route('/planet', methods=['POST'])
+def post_planet():
+    planet = request.get_json()
+    if not isinstance(planet['img'], str) or len(planet['img'].strip()) == 0:
+         return({'error':'"img" must be a string'}), 400
+    if not isinstance(planet['name'], str) or len(planet['name'].strip()) == 0:
+         return({'error':'"name" must be a string'}), 400
+    if not isinstance(planet['population'], str) or len(planet['population'].strip()) == 0:
+         return({'error':'"population" must be a string'}), 400
+    if not isinstance(planet['terrain'], str) or len(planet['terrain'].strip()) == 0:
+         return({'error':'"terrain" must be a string'}), 400
+    planet_created = Planet(img=planet['img'],name=planet['name'],population=planet['population'],terrain=planet['terrain'])
+    print(planet_created)
+    db.session.add(planet_created)
+    db.session.commit()
+    return jsonify('planet created'), 200
+
+# Crear nuevo vehiculo --------------------------------------------------------------------
+@app.route('/vehicle', methods=['POST'])
+def post_vehicle():
+    vehicle = request.get_json()
+    if not isinstance(vehicle['img'], str) or len(vehicle['img'].strip()) == 0:
+         return({'error':'"img" must be a string'}), 400
+    if not isinstance(vehicle['name'], str) or len(vehicle['name'].strip()) == 0:
+         return({'error':'"name" must be a string'}), 400
+    if not isinstance(vehicle['model'], str) or len(vehicle['model'].strip()) == 0:
+         return({'error':'"model" must be a string'}), 400
+    if not isinstance(vehicle['size'], str) or len(vehicle['size'].strip()) == 0:
+         return({'error':'"size" must be a string'}), 400
+    vehicle_created = Vehicle(img=vehicle['img'],name=vehicle['name'],model=vehicle['model'],size=vehicle['size'])
+    print(vehicle_created)
+    db.session.add(vehicle_created)
+    db.session.commit()
+    return jsonify('vehicle created'), 200
+
 # Agregar personaje a favoritos tomando como referencia el id de usuario y personaje -------
 @app.route('/favorite/user/<int:user_id>/character/<int:character_id>', methods=['POST'])
 def add_favorite_character(user_id, character_id):

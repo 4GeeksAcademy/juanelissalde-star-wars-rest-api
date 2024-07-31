@@ -48,6 +48,7 @@ class Favorites(db.Model):
 class Character(db.Model):
     __tablename__ = 'character'
     id = db.Column(db.Integer, primary_key=True)
+    img = db.Column(db.String(500))
     name = db.Column(db.String(80), unique=True)
     gender = db.Column(db.String(40))
     eye = db.Column(db.String(20))
@@ -58,6 +59,7 @@ class Character(db.Model):
     def serialize(self):
         return {
             "id": self.id,
+            "img": self.img,
             "name": self.name,
             "gender": self.gender,
             "eye": self.eye,
@@ -66,6 +68,7 @@ class Character(db.Model):
 class Planet(db.Model):
     __tablename__ = 'planet'
     id = db.Column(db.Integer, primary_key=True)
+    img = db.Column(db.String(500))
     name = db.Column(db.String(80), unique=True)
     population = db.Column(db.Integer)
     favorites = db.relationship('Favorites', backref='favorites_planet_id', lazy=True)
@@ -76,6 +79,7 @@ class Planet(db.Model):
     def serialize(self):
         return {
             "id": self.id,
+            "img": self.img,
             "name": self.name,
             "population": self.population,
         }
@@ -83,6 +87,7 @@ class Planet(db.Model):
 class Vehicle(db.Model):
     __tablename__ = 'vehicle'
     id = db.Column(db.Integer, primary_key=True)
+    img = db.Column(db.String(500))
     name = db.Column(db.String(80), unique=True)
     model = db.Column(db.String(40))
     size = db.Column(db.Integer)
@@ -94,6 +99,7 @@ class Vehicle(db.Model):
     def serialize(self):
         return {
             "id": self.id,
+            "img": self.img,
             "name": self.name,
             "model": self.model,
             "size": self.size,
